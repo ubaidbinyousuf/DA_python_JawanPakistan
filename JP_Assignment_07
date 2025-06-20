@@ -1,0 +1,69 @@
+import pandas as pd
+
+# Load the dataset
+try:
+    df = pd.read_csv('Salaries.csv')
+except FileNotFoundError:
+    print("Error: Salaries.csv not found. Please make sure the file is in the correct directory.")
+    exit()
+
+# 1. Which employee has the highest TotalPayBenefits?
+highest_pay_benefits_employee = df.loc[df['TotalPayBenefits'].idxmax()]
+print("1. Employee with the highest TotalPayBenefits:")
+print(highest_pay_benefits_employee[['EmployeeName', 'TotalPayBenefits']])
+print("\n")
+
+# 2. Drop ID, Notes, Agency and Status Columns
+df_dropped = df.drop(columns=['Id', 'Notes', 'Agency', 'Status'])
+print("2. DataFrame after dropping 'Id', 'Notes', 'Agency', and 'Status' columns:")
+print(df_dropped.head())
+print("\n")
+
+# 3. Total Number of Job Titles Contain POLICE
+police_job_titles_count = df[df['JobTitle'].str.contains('POLICE', case=False, na=False)].shape[0]
+print(f"3. Total Number of Job Titles containing 'POLICE': {police_job_titles_count}")
+print("\n")
+
+# 4. Top 10 most common job titles?
+top_10_job_titles = df['JobTitle'].value_counts().head(10)
+print("4. Top 10 most common job titles:")
+print(top_10_job_titles)
+print("\n")
+
+# 5. What are the top 10 average TotalPay by JobTitle?
+average_total_pay_by_job_title = df.groupby('JobTitle')['TotalPay'].mean().nlargest(10)
+print("5. Top 10 average TotalPay by JobTitle:")
+print(average_total_pay_by_job_title)
+print("\n")
+
+# 6. How many unique job titles are there each year?
+unique_job_titles_per_year = df.groupby('Year')['JobTitle'].nunique()
+print("6. Number of unique job titles per year:")
+print(unique_job_titles_per_year)
+print("\n")
+
+# 7. Find Average TotalPay Of All Employee Per Year
+average_total_pay_per_year = df.groupby('Year')['TotalPay'].mean()
+print("7. Average TotalPay of all employees per year:")
+print(average_total_pay_per_year)
+print("\n")
+
+# 8. How many unique employees worked each year?
+# Assuming 'EmployeeName' can be used as a unique identifier for employees
+unique_employees_per_year = df.groupby('Year')['EmployeeName'].nunique()
+print("8. Number of unique employees worked each year:")
+print(unique_employees_per_year)
+print("\n")
+
+# 9. Which year had the most employees earning over 100,000 in TotalPay?
+employees_over_100k = df[df['TotalPay'] > 100000]
+year_with_most_employees_over_100k = employees_over_100k['Year'].value_counts().idxmax()
+count_most_employees_over_100k = employees_over_100k['Year'].value_counts().max()
+print(f"9. The year with the most employees earning over $100,000 in TotalPay was {year_with_most_employees_over_100k} with {count_most_employees_over_100k} employees.")
+print("\n")
+
+# 10. Which columns have missing values?
+missing_values = df.isnull().sum()
+columns_with_missing_values = missing_values[missing_values > 0]
+print("10. Columns with missing values:")
+print(columns_with_missing_values)
