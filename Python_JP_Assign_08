@@ -1,0 +1,85 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset (replace 'your_car_data.csv' with the actual file name)
+df = pd.read_csv('your_car_data.csv')
+
+# --- 1. Check and Drop Duplicate Records ---
+print("Number of duplicate rows:", df.duplicated().sum())
+df.drop_duplicates(inplace=True)
+print("Number of rows after dropping duplicates:", len(df))
+
+# --- 2. Check and Drop missing or null values ---
+print("\nMissing values before handling:\n", df.isnull().sum())
+df.dropna(inplace=True) # Or use fillna()
+print("\nMissing values after handling:\n", df.isnull().sum())
+
+# --- 3. Top 10 average MSRP per car brand ---
+top_10_msrp = df.groupby('Make')['MSRP'].mean().round(0).sort_values(ascending=False).head(10)
+plt.figure(figsize=(10, 6))
+sns.barplot(x=top_10_msrp.values, y=top_10_msrp.index, palette='viridis')
+plt.title('Top 10 Average MSRP per Car Brand')
+plt.xlabel('Average MSRP')
+plt.ylabel('Car Brand')
+plt.show()
+
+# --- 4. MSRP change over the years ---
+msrp_over_years = df.groupby('Year')['MSRP'].mean().round(0)
+plt.figure(figsize=(10, 6))
+sns.lineplot(x=msrp_over_years.index, y=msrp_over_years.values)
+plt.title('Average MSRP Change Over the Years')
+plt.xlabel('Year')
+plt.ylabel('Average MSRP')
+plt.grid(True)
+plt.show()
+
+# --- 5. Engine HP and MPG change over the years ---
+hp_over_years = df.groupby('Year')['Engine HP'].mean()
+df['Average MPG'] = (df['City MPG'] + df['Highway MPG']) / 2
+mpg_over_years = df.groupby('Year')['Average MPG'].mean()
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1) # 1 row, 2 columns, 1st plot
+sns.lineplot(x=hp_over_years.index, y=hp_over_years.values)
+plt.title('Average Engine HP Over the Years')
+plt.xlabel('Year')
+plt.ylabel('Average Engine HP')
+plt.grid(True)
+
+plt.subplot(1, 2, 2) # 1 row, 2 columns, 2nd plot
+sns.lineplot(x=mpg_over_years.index, y=mpg_over_years.values)
+plt.title('Average MPG Over the Years')
+plt.xlabel('Year')
+plt.ylabel('Average MPG')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# --- 6. Percentage of cars: Compact, Midsize, Large ---
+vehicle_sizes = df[df['Vehicle Size'].isin(['Compact', 'Midsize', 'Large'])]['Vehicle Size'].value_counts()
+percentages = (vehicle_sizes / vehicle_sizes.sum()) * 100
+
+plt.figure(figsize=(8, 8))
+plt.pie(percentages, labels=percentages.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('pastel'))
+plt.title('Percentage of Cars by Size (Compact, Midsize, Large)')
+plt.axis('equal') # Equal aspect ratio ensures that pie is drawn as a circle.
+plt.show()
+
+# --- 7. Most sold vehicle styles ---
+top_vehicle_styles = df['Vehicle Style'].value_counts().head(10) # Adjust head() as needed
+plt.figure(figsize=(12, 7))
+sns.barplot(x=top_vehicle_styles.index, y=top_vehicle_styles.values, palette='crest')
+plt.title('Most Sold Vehicle Styles')
+plt.xlabel('Vehicle Style')
+plt.ylabel('Number of Vehicles Sold')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# --- 8. Car brands with high price and popularity ---
+filtered_cars = df[(df['MSRP'] >= 40000) & (df['Popularity'] >= 1000)]
+brand_counts = filtered_cars['Make'].value_counts()
+
+print("\nCar Brands with MSRP >= $40,000 and Popularity >= 1000:")
+print(brand_counts)
